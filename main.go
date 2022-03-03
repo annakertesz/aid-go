@@ -10,22 +10,35 @@
 package main
 
 import (
+	"fmt"
+	sw "github.com/annakertesz/aid-go/go"
+	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
 	"log"
 	"net/http"
 	"os"
+)
 
-	// WARNING!
-	// Change this to a fully-qualified import path
-	// once you place this file into your project.
-	// For example,
-	//
-	//    sw "github.com/myname/myrepo/go"
-	//
-	sw "github.com/annakertesz/aid-go/go"
+var db *sqlx.DB
 
+const (
+	host     = "localhost"
+	port     = 5432
+	user     = "anna"
+	password = "anna"
+	dbname   = "migrationaid"
 )
 
 func main() {
+	url := getConfig()
+	print("$")
+	print(url)
+	print("$")
+
+	_, err := connect(url)
+	if err != nil {
+		log.Fatalf("Connection error: %s", err.Error())
+	}
 	port := os.Getenv("PORT")
 
 	if port == "" {
@@ -36,4 +49,36 @@ func main() {
 	router := sw.NewRouter()
 
 	log.Fatal(http.ListenAndServe(":" + port, router))
+}
+
+func connect(dbURL string) (*sqlx.DB, error) {
+	db, err := sqlx.Open("postgres", dbURL)
+	db.SetMaxIdleConns(2)
+	db.SetMaxOpenConns(2)
+	if err != nil {
+		return nil, err
+	}
+
+	err = db.Ping()
+
+	if err != nil {
+		return nil, err
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	return db, nil
+}
+
+func getConfig() string {
+
+	url, ok := os.LookupEnv("DATABASE_URL")
+	if !ok {
+		psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
+			"password=%s dbname=%s sslmode=disable",
+			host, port, user, password, dbname)
+		url = psqlInfo
+	}
+	return url
 }
