@@ -12,6 +12,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 
 	// WARNING!
 	// Change this to a fully-qualified import path
@@ -25,9 +26,14 @@ import (
 )
 
 func main() {
+	port := os.Getenv("PORT")
+
+	if port == "" {
+		log.Fatal("$PORT must be set")
+	}
 	log.Printf("Server started")
 
 	router := sw.NewRouter()
 
-	log.Fatal(http.ListenAndServe(":8080", router))
+	log.Fatal(http.ListenAndServe(":" + port, router))
 }
