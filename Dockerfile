@@ -1,21 +1,14 @@
-FROM heroku/heroku:20-build as build
+FROM golang:1.10 AS build
+WORKDIR /go/src
+COPY go ./go
+COPY main.go .
 
-COPY . /app
-WORKDIR /app
+ENV CGO_ENABLED=0
+RUN go get -d -v ./...
 
-# Setup buildpack
-RUN mkdir -p /tmp/buildpack/heroku/go /tmp/build_cache /tmp/env
-RUN curl https://buildpack-registry.s3.amazonaws.com/buildpacks/heroku/go.tgz | tar xz -C /tmp/buildpack/heroku/go
+RUN go build -a -installsuffix cgo -o swagger .
 
-#Execute Buildpack
-RUN STACK=heroku-20 /tmp/buildpack/heroku/go/bin/compile /app /tmp/build_cache /tmp/env
-
-# Prepare final, minimal image
-FROM heroku/heroku:20
-
-COPY --from=build /app /app
-ENV HOME /app
-WORKDIR /app
-RUN useradd -m heroku
-USER heroku
-CMD /app/bin/go-getting-started
+FROM scratch AS runtime
+COPY --from=build /go/src/swagger ./
+EXPOSE 8080/tcp
+ENTRYPOINT ["./swagger"]

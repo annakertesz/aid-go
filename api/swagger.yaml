@@ -1,0 +1,729 @@
+---
+swagger: "2.0"
+info:
+  description: "Migration aid database and searcher for the Ukrain refugees."
+  version: "1.0.0"
+  title: "aid-ukraine"
+host: "aid-ukraine.herokuapp.com"
+basePath: "/v1"
+tags:
+- name: "accomodation"
+  description: "Accomodation manager"
+- name: "transport"
+  description: "Trasportation manager"
+- name: "people"
+  description: "Operations about voluneers"
+schemes:
+- "https"
+- "http"
+paths:
+  /accomodation:
+    get:
+      tags:
+      - "accomodation"
+      summary: "List all accomodation"
+      description: "Return every available and non-available accomodation of the db"
+      operationId: "listAllAccomodation"
+      produces:
+      - "application/json"
+      parameters: []
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Accomodation"
+        "400":
+          description: "Invalid status value"
+    post:
+      tags:
+      - "accomodation"
+      summary: "Add new accomodation"
+      description: ""
+      operationId: "addAccomodation"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Accomodation object that needs to be added to the store"
+        required: true
+        schema:
+          $ref: "#/definitions/Accomodation"
+        x-exportParamName: "Body"
+      responses:
+        "201":
+          description: "Created"
+        "405":
+          description: "Invalid input"
+    put:
+      tags:
+      - "accomodation"
+      summary: "Update an existing accomodation"
+      description: ""
+      operationId: "updateAccomodation"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Accomodation object that needs to be added to the store"
+        required: true
+        schema:
+          $ref: "#/definitions/Accomodation"
+        x-exportParamName: "Body"
+      responses:
+        "202":
+          description: "Accepted"
+        "400":
+          description: "Invalid ID supplied"
+        "404":
+          description: "Accomodation not found"
+        "405":
+          description: "Validation exception"
+  /accomodation/findByStatus:
+    get:
+      tags:
+      - "accomodation"
+      summary: "Finds Accomodations by status"
+      description: "Multiple status values can be provided with comma separated strings"
+      operationId: "findAccomodationsByStatus"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "status"
+        in: "query"
+        description: "Status values that need to be considered for filter"
+        required: true
+        type: "array"
+        items:
+          type: "string"
+          default: "available"
+          enum:
+          - "available"
+          - "pending"
+          - "toDelete"
+          - "needClarification"
+        collectionFormat: "multi"
+        x-exportParamName: "Status"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Accomodation"
+        "400":
+          description: "Invalid status value"
+  /accomodation/filter:
+    get:
+      tags:
+      - "accomodation"
+      summary: "Filter accomodation"
+      description: "Multiple filter query can be added"
+      operationId: "filterAccomodations"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "city"
+        in: "query"
+        description: "City to filter by"
+        required: false
+        type: "string"
+        x-exportParamName: "City"
+        x-optionalDataType: "String"
+      - name: "guestNum"
+        in: "query"
+        description: "Number of people to accomodate"
+        required: false
+        type: "integer"
+        x-exportParamName: "GuestNum"
+        x-optionalDataType: "Int32"
+      - name: "male"
+        in: "query"
+        description: "Are men allowed"
+        required: false
+        type: "integer"
+        x-exportParamName: "Male"
+        x-optionalDataType: "Int32"
+      - name: "female"
+        in: "query"
+        description: "Are women allowed"
+        required: false
+        type: "integer"
+        x-exportParamName: "Female"
+        x-optionalDataType: "Int32"
+      - name: "kids"
+        in: "query"
+        description: "Are kids allowed"
+        required: false
+        type: "integer"
+        x-exportParamName: "Kids"
+        x-optionalDataType: "Int32"
+      - name: "animals"
+        in: "query"
+        description: "Are animals allowed"
+        required: false
+        type: "integer"
+        x-exportParamName: "Animals"
+        x-optionalDataType: "Int32"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Accomodation"
+        "400":
+          description: "Invalid tag value"
+  /accomodation/{accomodationId}:
+    get:
+      tags:
+      - "accomodation"
+      summary: "Find accomodation by ID"
+      description: "Returns a single accomodation"
+      operationId: "getAccomodationById"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "accomodationId"
+        in: "path"
+        description: "ID of accomodation to return"
+        required: true
+        type: "integer"
+        format: "int64"
+        x-exportParamName: "AccomodationId"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Accomodation"
+        "400":
+          description: "Invalid ID supplied"
+        "404":
+          description: "Accomodation not found"
+    delete:
+      tags:
+      - "accomodation"
+      summary: "Deletes an accomodation"
+      description: ""
+      operationId: "deleteAccomodation"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "accomodationId"
+        in: "path"
+        description: "Accomodation id to delete"
+        required: true
+        type: "integer"
+        format: "int64"
+        x-exportParamName: "AccomodationId"
+      responses:
+        "200":
+          description: "Accomodation deleted succesfully"
+        "400":
+          description: "Invalid ID supplied"
+        "404":
+          description: "Accomodation not found"
+  /transport:
+    get:
+      tags:
+      - "transport"
+      summary: "List all transport"
+      description: "Return every available and non-available transportation of the\
+        \ db"
+      operationId: "listAllTransportation"
+      produces:
+      - "application/json"
+      parameters: []
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Transportation"
+        "400":
+          description: "Invalid status value"
+    post:
+      tags:
+      - "transport"
+      summary: "Add new transportation"
+      description: ""
+      operationId: "addTransportation"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Trasportation object that needs to be added to the store"
+        required: true
+        schema:
+          $ref: "#/definitions/Transportation"
+        x-exportParamName: "Body"
+      responses:
+        "201":
+          description: "Created"
+        "405":
+          description: "Invalid input"
+    put:
+      tags:
+      - "transport"
+      summary: "Update an existing transportation"
+      description: ""
+      operationId: "updateTransportation"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Transportation object that needs to be added to the store"
+        required: true
+        schema:
+          $ref: "#/definitions/Transportation"
+        x-exportParamName: "Body"
+      responses:
+        "202":
+          description: "Accepted"
+        "400":
+          description: "Invalid ID supplied"
+        "404":
+          description: "Transportation not found"
+        "405":
+          description: "Validation exception"
+  /transport/findByStatus:
+    get:
+      tags:
+      - "transport"
+      summary: "Finds Transportations by status"
+      description: "Multiple status values can be provided with comma separated strings"
+      operationId: "findTransportationsByStatus"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "status"
+        in: "query"
+        description: "Status values that need to be considered for filter"
+        required: true
+        type: "array"
+        items:
+          type: "string"
+          default: "available"
+          enum:
+          - "available"
+          - "pending"
+          - "toDelete"
+          - "needClarification"
+        collectionFormat: "multi"
+        x-exportParamName: "Status"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Transportation"
+        "400":
+          description: "Invalid status value"
+  /transport/filter:
+    get:
+      tags:
+      - "transport"
+      summary: "Filter transportation"
+      description: "Multiple filter query can be added"
+      operationId: "filterTransportations"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "departure"
+        in: "query"
+        description: "City to filter by"
+        required: false
+        type: "string"
+        x-exportParamName: "Departure"
+        x-optionalDataType: "String"
+      - name: "seatsNeeded"
+        in: "query"
+        description: "Number of people to transport"
+        required: false
+        type: "integer"
+        x-exportParamName: "SeatsNeeded"
+        x-optionalDataType: "Int32"
+      - name: "kids"
+        in: "query"
+        description: "Are kids seat nedded"
+        required: false
+        type: "integer"
+        x-exportParamName: "Kids"
+        x-optionalDataType: "Int32"
+      - name: "animals"
+        in: "query"
+        description: "Are animals allowed"
+        required: false
+        type: "integer"
+        x-exportParamName: "Animals"
+        x-optionalDataType: "Int32"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Transportation"
+        "400":
+          description: "Invalid tag value"
+  /transport/{transportationId}:
+    get:
+      tags:
+      - "transport"
+      summary: "Find transportation by ID"
+      description: "Returns a single transportation"
+      operationId: "getTransportationById"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "transportationId"
+        in: "path"
+        description: "ID of transportation to return"
+        required: true
+        type: "integer"
+        format: "int64"
+        x-exportParamName: "TransportationId"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Transportation"
+        "400":
+          description: "Invalid ID supplied"
+        "404":
+          description: "Transportation not found"
+    delete:
+      tags:
+      - "transport"
+      summary: "Deletes a transportation"
+      description: ""
+      operationId: "deleteTransportation"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "transportationId"
+        in: "path"
+        description: "Transportation id to delete"
+        required: true
+        type: "integer"
+        format: "int64"
+        x-exportParamName: "TransportationId"
+      responses:
+        "200":
+          description: "Transportation deleted succesfully"
+        "400":
+          description: "Invalid ID supplied"
+        "404":
+          description: "Transportation not found"
+  /people:
+    get:
+      tags:
+      - "people"
+      summary: "List all people"
+      description: "Return every people of the db"
+      operationId: "listAllPeople"
+      produces:
+      - "application/json"
+      parameters: []
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Person"
+        "400":
+          description: "Invalid status value"
+    post:
+      tags:
+      - "people"
+      summary: "Add new person"
+      description: ""
+      operationId: "addPerson"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Person object that needs to be added to the store"
+        required: true
+        schema:
+          $ref: "#/definitions/Person"
+        x-exportParamName: "Body"
+      responses:
+        "201":
+          description: "Created"
+        "405":
+          description: "Invalid input"
+    put:
+      tags:
+      - "people"
+      summary: "Update an existing Person"
+      description: ""
+      operationId: "updatePerson"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Person object that needs to be added to the store"
+        required: true
+        schema:
+          $ref: "#/definitions/Person"
+        x-exportParamName: "Body"
+      responses:
+        "202":
+          description: "Accepted"
+        "400":
+          description: "Invalid ID supplied"
+        "404":
+          description: "Person not found"
+        "405":
+          description: "Validation exception"
+  /people/findByStatus:
+    get:
+      tags:
+      - "people"
+      summary: "Finds people by status"
+      description: "Multiple status values can be provided with comma separated strings"
+      operationId: "findPeopleByStatus"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "status"
+        in: "query"
+        description: "Status values that need to be considered for filter"
+        required: true
+        type: "array"
+        items:
+          type: "string"
+          default: "available"
+          enum:
+          - "available"
+          - "pending"
+          - "toDelete"
+          - "needClarification"
+        collectionFormat: "multi"
+        x-exportParamName: "Status"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Person"
+        "400":
+          description: "Invalid status value"
+  /people/{personId}:
+    get:
+      tags:
+      - "people"
+      summary: "Find Person by ID"
+      description: "Returns a single Person"
+      operationId: "getPersonById"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "personId"
+        in: "path"
+        description: "ID of Person to return"
+        required: true
+        type: "integer"
+        format: "int64"
+        x-exportParamName: "PersonId"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Person"
+        "400":
+          description: "Invalid ID supplied"
+        "404":
+          description: "Person not found"
+    delete:
+      tags:
+      - "people"
+      summary: "Deletes a Person"
+      description: ""
+      operationId: "deletePerson"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "personId"
+        in: "path"
+        description: "Person id to delete"
+        required: true
+        type: "integer"
+        format: "int64"
+        x-exportParamName: "PersonId"
+      responses:
+        "200":
+          description: "Person deleted succesfully"
+        "400":
+          description: "Invalid ID supplied"
+        "404":
+          description: "Person not found"
+definitions:
+  Accomodation:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+        format: "int64"
+      person:
+        $ref: "#/definitions/Person"
+      city:
+        type: "string"
+      max:
+        type: "integer"
+        format: "int64"
+      male:
+        type: "boolean"
+      female:
+        type: "boolean"
+      kids:
+        type: "boolean"
+      animals:
+        type: "boolean"
+      availableFrom:
+        type: "string"
+        format: "date"
+      transport:
+        type: "boolean"
+      comment:
+        type: "string"
+      status:
+        $ref: "#/definitions/Status"
+      statusComment:
+        type: "string"
+    example:
+      city: "city"
+      max: 5
+      transport: true
+      availableFrom: "2000-01-23"
+      person:
+        phone: "phone"
+        name: "name"
+        nightCall: true
+        id: 6
+        statusComment: "statusComment"
+        email: "email"
+        status:
+          description: "description"
+          id: 1
+      comment: "comment"
+      id: 0
+      animals: true
+      statusComment: "statusComment"
+      female: true
+      male: true
+      kids: true
+      status:
+        description: "description"
+        id: 1
+  Status:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+        format: "int64"
+      description:
+        type: "string"
+    example:
+      description: "description"
+      id: 1
+  Person:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+        format: "int64"
+      name:
+        type: "string"
+      phone:
+        type: "string"
+      email:
+        type: "string"
+      nightCall:
+        type: "boolean"
+      status:
+        $ref: "#/definitions/Status"
+      statusComment:
+        type: "string"
+    example:
+      phone: "phone"
+      name: "name"
+      nightCall: true
+      id: 6
+      statusComment: "statusComment"
+      email: "email"
+      status:
+        description: "description"
+        id: 1
+  Transportation:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+        format: "int64"
+      person:
+        $ref: "#/definitions/Person"
+      departure:
+        type: "string"
+      seats:
+        type: "integer"
+        format: "int64"
+      kidsSeat:
+        type: "boolean"
+      animals:
+        type: "boolean"
+      availableFrom:
+        type: "string"
+        format: "date"
+      comment:
+        type: "string"
+      status:
+        $ref: "#/definitions/Status"
+      statusComment:
+        type: "string"
+    example:
+      person:
+        phone: "phone"
+        name: "name"
+        nightCall: true
+        id: 6
+        statusComment: "statusComment"
+        email: "email"
+        status:
+          description: "description"
+          id: 1
+      comment: "comment"
+      id: 0
+      departure: "departure"
+      animals: true
+      statusComment: "statusComment"
+      seats: 6
+      availableFrom: "2000-01-23"
+      kidsSeat: true
+      status:
+        description: "description"
+        id: 1
